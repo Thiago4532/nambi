@@ -6,8 +6,6 @@
 #include <string_view>
 #include <sys/types.h>
 
-typedef int fd_t;
-
 class process {
 public:
     process(std::string_view epath,
@@ -24,6 +22,12 @@ public:
         UNKNOWN
     };
 
+    struct stdio {
+        std::string_view stdin;
+        std::string_view stdout;
+        std::string_view stderr;
+    };
+
     code status(bool wait=false);
     bool isRunning() { return status() == code::RUNNING; }
     code wait() { return status(true); }
@@ -32,7 +36,7 @@ public:
     std::string_view getSignal();
 
 // private:
-    fd_t _stdin, _stdout, _stderr;
+    int _stdin, _stdout, _stderr;
 
     pid_t _pid {};
 

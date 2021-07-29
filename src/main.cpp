@@ -6,7 +6,7 @@
 using namespace std;
 
 int main() {
-    process proc("/bin/sh", {"-c", "echo oi"});
+    process proc("/bin/sh", {"-c", "ls -l /proc/$$/fd"});
 
     auto x = proc.wait();
 
