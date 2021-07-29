@@ -1,5 +1,5 @@
-#ifndef _SPAWN_HPP
-#define _SPAWN_HPP
+#ifndef _PROCESS_HPP
+#define _PROCESS_HPP
 
 #include <vector>
 #include <string>
