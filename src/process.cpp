@@ -79,6 +79,33 @@ bool fdgetline(int fd, std::string& str) {
 
 }
 
+process::process(std::string_view epath,
+                 std::vector<std::string> const& args) {
+
+    pipe_t pIn  = pipe();
+    pipe_t pOut = pipe();
+    pipe_t pErr = pipe();
+
+    _pid = fork([&]() {
+        close(pIn.out);
+        close(pOut.in);
+        close(pErr.in);
+
+        dup(pIn.in, STDIN_FILENO);
+        dup(pOut.out, STDOUT_FILENO);
+        dup(pErr.out, STDERR_FILENO);
+        execv(epath, args);
+    });
+
+    close(pIn.in);
+    close(pOut.out);
+    close(pErr.out);
+
+    _stdin  = pIn.out;
+    _stdout = pOut.in;
+    _stderr = pErr.in;
+}
+
 process::code process::status(bool wait) {
     if (_status != code::RUNNING)
         return _status;
@@ -112,37 +139,10 @@ std::string_view process::getSignal() {
     char* ptr = strsignal( WTERMSIG(_wstatus) );
     if (ptr == nullptr) {
         LOG("unknown signal!");
-        return "";
+        return ""; // Unknown status
     }
 
     return ptr;
-}
-
-process::process(std::string_view epath,
-                 std::vector<std::string> const& args) {
-
-    pipe_t pIn  = pipe();
-    pipe_t pOut = pipe();
-    pipe_t pErr = pipe();
-
-    _pid = fork([&]() {
-        close(pIn.out);
-        close(pOut.in);
-        close(pErr.in);
-
-        dup(pIn.in, STDIN_FILENO);
-        dup(pOut.out, STDOUT_FILENO);
-        dup(pErr.out, STDERR_FILENO);
-        execv(epath, args);
-    });
-
-    close(pIn.in);
-    close(pOut.out);
-    close(pErr.out);
-
-    _stdin  = pIn.out;
-    _stdout = pOut.in;
-    _stderr = pErr.in;
 }
 
 bool process::readLine(std::string& str) { return fdgetline(_stdout, str); }

@@ -6,18 +6,21 @@
 #include <iostream>
 
 template <typename T>
-inline void __log(T&& fmt) {
+static inline
+void __log(T&& fmt) {
     std::cerr << fmt << std::endl;
 }
 
 template <typename T, typename... Args>
-inline void __log(T&& fmt, Args... args) {
+static inline
+void __log(T&& fmt, Args... args) {
     std::cerr << fmt << " ";
     __log(args...);
 }
 
 template <typename T, typename... Args>
-inline void __log2(T&& fmt, Args... args) {
+static inline
+void __log2(T&& fmt, Args... args) {
     std::cerr << "[" << fmt << "]: ";
     __log(args...);
 }
