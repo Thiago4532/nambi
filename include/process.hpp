@@ -14,6 +14,9 @@ public:
             std::vector<std::string> const& args);
     ~process();
 
+    bool readLine(std::string& str);
+    bool readErrLine(std::string& str);
+
     enum class code {
         RUNNING,
         EXITED,

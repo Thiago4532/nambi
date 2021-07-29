@@ -62,6 +62,21 @@ pid_t fork(Function&& f, Args&&... args) {
     return pid;
 }
 
+bool fdgetline(int fd, std::string& str) {
+    bool not_eof = false;
+    char c;
+
+    str.clear();
+    while (read(fd, &c, 1) > 0) {
+        not_eof = true;
+
+        if (c == '\n') break;
+        str += c;
+    }
+
+    return not_eof;
+}
+
 }
 
 process::code process::status(bool wait) {
@@ -129,6 +144,9 @@ process::process(std::string_view epath,
     _stdout = pOut.in;
     _stderr = pErr.in;
 }
+
+bool process::readLine(std::string& str) { return fdgetline(_stdout, str); }
+bool process::readErrLine(std::string& str) { return fdgetline(_stderr, str); }
 
 process::~process() {
     LOG("called!");
