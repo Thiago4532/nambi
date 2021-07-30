@@ -6,15 +6,14 @@
 using namespace std;
 
 int main() {
-    process proc("/bin/sh", {"-c", "cat"}, {.stdin = "oi"});
+    process proc("/bin/sh", {"-c", "lolcat"}, {.stdin=""});
 
+    proc.sendEOF();
     auto x = proc.wait();
 
-    string s;
-    while (proc.readLine(s)) {
-        cout << s << '\n';
-    }
-
-
+    // string s;
+    // while (proc.readLine(s)) {
+    //     cout << s << '\n';
+    // }
     return 0;
 }

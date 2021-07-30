@@ -33,12 +33,13 @@ public:
     bool isRunning() { return status() == code::RUNNING; }
     code wait() { return status(true); }
 
+    void sendEOF();
+
     int getExitStatus();
     std::string_view getSignal();
 
 // private:
     int _stdin, _stdout, _stderr;
-
     pid_t _pid {};
 
     int _wstatus;

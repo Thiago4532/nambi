@@ -100,8 +100,8 @@ void close_all_fds() {
     closedir(dir);
 }
 
-int open(std::string_view pathname, int flags) {
-    int fd = ::open(pathname.data(), flags);
+int open(std::string_view pathname, int flags, mode_t mode = 0644) {
+    int fd = ::open(pathname.data(), flags, mode);
     if (fd == -1)
         throw std::system_error(errno, std::generic_category(), "open");
 

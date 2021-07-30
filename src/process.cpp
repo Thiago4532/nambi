@@ -15,9 +15,9 @@ process::process(std::string_view epath,
     if (io.stdin.empty()) std::tie(fdIn, _stdin) = pipe();
     else fdIn = open(io.stdin, O_RDONLY);
     if (io.stdout.empty()) std::tie(_stdout, fdOut) = pipe();
-    else fdOut = open(io.stdout, O_WRONLY);
+    else fdOut = open(io.stdout, O_WRONLY | O_CREAT);
     if (io.stderr.empty()) std::tie(_stderr, fdErr) = pipe();
-    else fdErr = open(io.stderr, O_WRONLY);
+    else fdErr = open(io.stderr, O_WRONLY | O_CREAT);
 
     _pid = fork([&]() {
         dup(fdIn, STDIN_FILENO);
@@ -45,6 +45,14 @@ process::code process::status(bool wait) {
     }
 
     return _status;
+}
+
+void process::sendEOF() {
+    if (_stdin < 0)
+        return;
+
+    close(_stdin);
+    _stdin = -1;
 }
 
 int process::getExitStatus() {
