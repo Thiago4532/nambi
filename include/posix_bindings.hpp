@@ -1,8 +1,10 @@
 #ifndef _POSIX_BINDINGS_HPP
 #define _POSIX_BINDINGS_HPP
 
+#include "log.hpp"
 #include <cerrno>
 #include <dirent.h>
+#include <fcntl.h>
 #include <functional>
 #include <system_error>
 #include <unistd.h>
@@ -10,10 +12,7 @@
 
 namespace {
 
-struct pipe_t {
-    int in; 
-    int out;
-};
+typedef std::pair<int, int> pipe_t;
 
 void execv(std::string_view epath,
                   std::vector<std::string> const& args) {
@@ -34,8 +33,7 @@ pipe_t pipe() {
     if (::pipe(fd) == -1)
         throw std::system_error(errno, std::generic_category(), __func__);
 
-    return {.in  = fd[0],
-            .out = fd[1]};
+    return {fd[0], fd[1]};
 }
 
 void dup(int oldfd, int newfd) {
@@ -61,6 +59,8 @@ pid_t fork(Function&& f, Args&&... args) {
 }
 
 bool fdgetline(int fd, std::string& str) {
+    if (fd < 0) return false;
+
     bool not_eof = false;
     char c;
 
@@ -98,6 +98,14 @@ void close_all_fds() {
     }
 
     closedir(dir);
+}
+
+int open(std::string_view pathname, int flags) {
+    int fd = ::open(pathname.data(), flags);
+    if (fd == -1)
+        throw std::system_error(errno, std::generic_category(), "open");
+
+    return fd;
 }
 
 }

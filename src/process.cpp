@@ -8,33 +8,30 @@
 #include "posix_bindings.hpp"
 
 process::process(std::string_view epath,
-                 std::vector<std::string> const& args) {
+                 std::vector<std::string> const& args,
+                 stdio const& io) : _stdin(-1), _stdout(-1), _stderr(-1) {
+    int fdIn, fdOut, fdErr;
 
-    pipe_t pIn  = pipe();
-    pipe_t pOut = pipe();
-    pipe_t pErr = pipe();
+    if (io.stdin.empty()) std::tie(fdIn, _stdin) = pipe();
+    else fdIn = open(io.stdin, O_RDONLY);
+    if (io.stdout.empty()) std::tie(_stdout, fdOut) = pipe();
+    else fdOut = open(io.stdout, O_WRONLY);
+    if (io.stderr.empty()) std::tie(_stderr, fdErr) = pipe();
+    else fdErr = open(io.stderr, O_WRONLY);
 
     _pid = fork([&]() {
-        close(pIn.out);
-        close(pOut.in);
-        close(pErr.in);
-
-        dup(pIn.in, STDIN_FILENO);
-        dup(pOut.out, STDOUT_FILENO);
-        dup(pErr.out, STDERR_FILENO);
+        dup(fdIn, STDIN_FILENO);
+        dup(fdOut, STDOUT_FILENO);
+        dup(fdErr, STDERR_FILENO);
 
         close_all_fds();
 
         execv(epath, args);
     });
 
-    close(pIn.in);
-    close(pOut.out);
-    close(pErr.out);
-
-    _stdin  = pIn.out;
-    _stdout = pOut.in;
-    _stderr = pErr.in;
+    close(fdIn);
+    close(fdOut);
+    close(fdErr);
 }
 
 process::code process::status(bool wait) {

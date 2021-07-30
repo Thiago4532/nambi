@@ -8,8 +8,15 @@
 
 class process {
 public:
+    struct stdio {
+        std::string_view stdin;
+        std::string_view stdout;
+        std::string_view stderr;
+    };
+
     process(std::string_view epath,
-            std::vector<std::string> const& args);
+            std::vector<std::string> const& args,
+            stdio const& io = {});
     ~process();
 
     bool readLine(std::string& str);
@@ -20,12 +27,6 @@ public:
         EXITED,
         SIGNALED,
         UNKNOWN
-    };
-
-    struct stdio {
-        std::string_view stdin;
-        std::string_view stdout;
-        std::string_view stderr;
     };
 
     code status(bool wait=false);
